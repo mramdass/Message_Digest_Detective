@@ -10,6 +10,7 @@
 try:
     import os, sys, json
     from threading import Thread
+    from time import time
     from datetime import datetime
     from time import sleep
     from zipfile import ZipFile
@@ -93,10 +94,7 @@ def unzip(path, keys, read = False):
                             if digest not in status:
                                 status[digest] = []
                                 status[digest].append(line.rstrip())
-                                print '\tFound:', line.rstrip()
-                            else:
-                                status[digest].append(line.rstrip())
-                                print '\tFound:', line.rstrip()
+                            else: status[digest].append(line.rstrip())
     
 def get_mfg():
     metadata = {}
@@ -179,17 +177,28 @@ def get_digests(path):
                     digests[digest].append(os.path.join(root, f))
                 else: digests[get_digest(os.path.join(root, f))].append(os.path.join(root, f))
 
-print 'START:', datetime.now()
+def main():
+    start = time()
+    start_time = datetime.now()
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--directory", help = "Desired directory to analyze", required = True)
+    args = parser.parse_args()
+    print 'START:', start_time
 
-split_metadata = load_map('metadata.json')
+    directory = args.directory
+    dir_list = directory.split('/')
+    lowest_dir = dir_list[len(dir_list) - 1]
+    
+    split_metadata = load_map('metadata.json')
+    get_rds_metadata()
+    get_digests(directory)
+    print 'Length of digests: ', len(digests)
+    
+    split_search(digests)
+    
+    write_map('output/found_' + lowest_dir + '.json', status)
+    
+    print 'END:', datetime.now(), 'TIME ELAPSED:', time() - start
 
-#get_digests('C:\Windows\System32')
-get_digests('C:\Program Files')
-print 'Length of digests: ', len(digests)
-split_search(digests)
-write_map('output/found.json', status)
-get_rds_metadata()
-
-
-
-print 'END:', datetime.now()
+main()
