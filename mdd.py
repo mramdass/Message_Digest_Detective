@@ -8,7 +8,7 @@
 '''
 
 try:
-    import os, sys, json
+    import os, sys, json, argparse
     from threading import Thread
     from time import time
     from datetime import datetime
@@ -178,6 +178,7 @@ def get_digests(path):
                 else: digests[get_digest(os.path.join(root, f))].append(os.path.join(root, f))
 
 def main():
+    global split_metadata, digests, rds_metadata, status
     start = time()
     start_time = datetime.now()
     
@@ -189,7 +190,7 @@ def main():
     directory = args.directory
     dir_list = directory.split('/')
     lowest_dir = dir_list[len(dir_list) - 1]
-    
+
     split_metadata = load_map('metadata.json')
     get_rds_metadata()
     get_digests(directory)
@@ -198,7 +199,8 @@ def main():
     split_search(digests)
     
     write_map('output/found_' + lowest_dir + '.json', status)
-    
+
+    print str(len(digests)) + ' out of ' + str(len(status)) + ' found in RDS'
     print 'END:', datetime.now(), 'TIME ELAPSED:', time() - start
 
 main()
