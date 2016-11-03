@@ -26,7 +26,7 @@ http://www.nsrl.nist.gov/Downloads.htm
 
 ### Installing
 
-Clone/Download this respository. Note that the '.zip' files in this repository are placeholders as it is very large. From the Combo DVD, place the appropriate named '.zip' file with in the appropriate directory. Then run split.py to generate the remaining '.zip' files as mentioned in 'Getting Started'.
+Clone/Download this respository. Note that the '.zip' files in this repository are placeholders as it is very large. From the Combo DVD, place the appropriate named '.zip' file in the appropriate directory. Then run split.py to generate the remaining '.zip' files as mentioned in 'Getting Started'.
 
 ### To Run
 ```
