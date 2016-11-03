@@ -1,0 +1,18 @@
+Dec 1, 2013 RDS 2.43
+
+The full RDS Release has become too large for distribution on four CDROMs. For users familiar with the process of using four CDROMs to load RDS data you will find a directory called RDS_Split on this DVD. This directory contains the four RDS zip files that were traditionally distributed on the four CDROMS.
+
+For users interested in processing a unified RDS set, a directory called RDS_Unified can be found on this DVD. This directory contains the RDS files as traditionally presented on the RDS DVD ISO.
+
+The NSRL will be shifting to a single DVD physical release containing only one of these methods (Split, Unified). The NSRL welcomes input from its users. If you have a preference for one of these formats please contact us:
+
+National Institute of Standards and Technology
+ATTN NSRL Project
+100 Bureau Drive, Stop 8970
+Gaithersburg, MD 20899-8970 USA
+
+E-mail nsrl@nist.gov
+
+Phone 301-975-3262
+FAX 301-948-6213
+

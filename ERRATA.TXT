@@ -1,0 +1,14 @@
+# The following operating system was removed from NSRLOS.txt:
+
+OS code: 665, name: Android, version: 2.2
+
+# The following entries in NSRLProd.txt have been modified to account for this change:
+
+Prodcode: 24745, "McAfee All Access Individual 2013", that  was mapped to OS code: 665 is now mapped to OS code: 818
+Prodcode: 24747, "McAfee All Access Household 2013", that  was mapped to OS code: 665 is now mapped to OS code: 818
+Prodcode: 24395, "Norton 360 Everywhere", that  was mapped to OS code: 665 is now mapped to OS code: 818
+Prodcode: 24743, "Norton Anti-Theft", that  was mapped to OS code: 665 is now mapped to OS code: 818
+
+# The following typos were corrected in NSRLProd.txt:
+
+Procode: 24698 WInZip 17 Pro -> WinZip 17 Pro
