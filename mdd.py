@@ -18,21 +18,24 @@ try:
     from subprocess import check_output
 except Exception as e:
     print '\t', e
+    exit()
 
 # File paths
 A_path = 'RDS_Split/A/'
 B_path = 'RDS_Split/B/'
 C_path = 'RDS_Split/C/'
 D_path = 'RDS_Split/D/'
+U_path = 'RDS_Unified/'
 
-# File paths to zipped files - NOT USED
-A = 'RDS_Split/A/RDS_253_A.zip'
-B = 'RDS_Split/B/RDS_253_B.zip'
-C = 'RDS_Split/C/RDS_253_C.zip'
-D = 'RDS_Split/D/RDS_253_D.zip'
+# File paths to zipped files
+A = 'RDS_Split/A/RDS_253_A.zip' # NOT USED
+B = 'RDS_Split/B/RDS_253_B.zip' # NOT USED
+C = 'RDS_Split/C/RDS_253_C.zip' # NOT USED
+D = 'RDS_Split/D/RDS_253_D.zip' # NOT USED
+U = 'RDS_Unified/NSRLFile.txt.zip'
 
 # File/record names in zipped files
-File    = 'NSRLFile.txt' # NOT USED
+File    = 'NSRLFile.txt'
 Mfg     = 'NSRLMfg.txt'
 OS      = 'NSRLOS.txt'
 Prod    = 'NSRLProd.txt'
@@ -55,12 +58,18 @@ D_lines = 43506769
 
 # Map of SHA-1 hashes to file name from desired directory
 digests = {}
-# Map of data provided by NSLR
+
+# Map of data provided by NSLR; uses 'NSRLMfg.txt', 'NSRLOS.txt', and 'NSRLProd.txt'
 rds_metadata = {}
+
 # All the SHA-1 hashes that were found in the desired directory
 status = {}
-# Metadata to search the correct NSLR text files in constant time
+
+# Metadata to search the correct NSLR text files in constant time; uses 'metadata.json'
 split_metadata = {}
+
+# List to join VirusTotal threads
+virustotal_threads = []
 
 def load_map(name):
     with open(name) as d:
@@ -71,11 +80,12 @@ def print_map(name): return json.dumps(name, sort_keys = True, indent = 4, separ
 def write_map(name, hashmap):
     with open(name, 'w') as w: w.write(print_map(hashmap))
 
-def unzip(path, keys, read = False):
+def unzip_split(path, keys, read = False):
     '''
         Linear search for key/digest in a desired zipped repord
         If read is true, this function returns the entire record
             'keys' becomes filename
+        Uses the split RDS
     '''
     if read:
         with ZipFile(path) as zf:
@@ -95,39 +105,93 @@ def unzip(path, keys, read = False):
                                 status[digest] = []
                                 status[digest].append(line.rstrip())
                             else: status[digest].append(line.rstrip())
+
+def unzip_unified(path, keys = None, read = False):
+    '''
+        Linear search for key/digest in a desired zipped repord
+        If read is true, this function returns the entire record
+        Uses the unified RDS
+    '''
+    if read and keys == None:
+        with open(path, 'r') as f: return map(str.rstrip, f.readlines())
+    if len(keys) == 0: return
+    with ZipFile(path) as zf:
+        with zf.open(File, mode = 'r') as f:
+            next(f)
+            for line in f:
+                if keys[0] == line[1:41]:
+                    if keys[0] not in status:
+                        status[keys[0]] = []
+                        status[keys[0]].append(line.rstrip())
+                        keys.pop(0)
+                    else:
+                        status[digest].append(line.rstrip())
+                        keys.pop(0)
+                if len(keys) == 0: break
+                while int(keys[0], 16) < int(line[1:41], 16):
+                    #CALL VIRUSTOTAL
+                    print 'virustotal'
+                    status[keys[0]] = 'UNKNOWN'
+                    keys.pop(0)
+                    if len(keys) == 0: break
+            
     
-def get_mfg():
+def get_mfg(unified = False):
     metadata = {}
-    for zipped in [A, B, C, D]:
-        for line in unzip(zipped, Mfg, read = True): metadata[line.split(',')[0].strip('"')] = line.split(',')[1].strip('"')
+    if unified:
+        for line in unzip_unified(U_path + Mfg, read = True): metadata[line.split(',')[0].strip('"')] = line.split(',')[1].strip('"')
+    else:
+        for zipped in [A, B, C, D]:
+            for line in unzip(zipped, Mfg, read = True): metadata[line.split(',')[0].strip('"')] = line.split(',')[1].strip('"')
     return metadata
 
-def get_os():
+def get_os(unified = False):
     metadata = {}
-    for zipped in [A, B, C, D]:
-        for line in unzip(zipped, OS, read = True):
+    if unified:
+        for line in unzip_unified(U_path + OS, read = True):
             metadata[line.split(',')[0].strip('"')] = { 'sysname': '', 'sysversion': '', 'mfg': '' }
             metadata[line.split(',')[0].strip('"')]['sysname'] = line.split(',')[1].strip('"')
             metadata[line.split(',')[0].strip('"')]['sysversion'] = line.split(',')[2].strip('"')
             metadata[line.split(',')[0].strip('"')]['mfg'] = line.split(',')[3].strip('"')
+    else:
+        for zipped in [A, B, C, D]:
+            for line in unzip(zipped, OS, read = True):
+                metadata[line.split(',')[0].strip('"')] = { 'sysname': '', 'sysversion': '', 'mfg': '' }
+                metadata[line.split(',')[0].strip('"')]['sysname'] = line.split(',')[1].strip('"')
+                metadata[line.split(',')[0].strip('"')]['sysversion'] = line.split(',')[2].strip('"')
+                metadata[line.split(',')[0].strip('"')]['mfg'] = line.split(',')[3].strip('"')
     return metadata
 
-def get_prod():
+def get_prod(unified = False):
     metadata = {}
-    for zipped in [A, B, C, D]:
-        for line in unzip(zipped, Prod, read = True):
+    if unified:
+        for line in unzip_unified(U_path + Prod, read = True):
             if line.split(',')[0].strip('"') not in metadata:
                 metadata[line.split(',')[0].strip('"')] = []
             metadata[line.split(',')[0].strip('"')].append((line.split(',')[1].strip('"'), line.split(',')[2].strip('"'), line.split(',')[3].strip('"'), line.split(',')[4].strip('"'), line.split(',')[5].strip('"'), line.split(',')[6].strip('"')))
+    else:
+        for zipped in [A, B, C, D]:
+            for line in unzip(zipped, Prod, read = True):
+                if line.split(',')[0].strip('"') not in metadata:
+                    metadata[line.split(',')[0].strip('"')] = []
+                metadata[line.split(',')[0].strip('"')].append((line.split(',')[1].strip('"'), line.split(',')[2].strip('"'), line.split(',')[3].strip('"'), line.split(',')[4].strip('"'), line.split(',')[5].strip('"'), line.split(',')[6].strip('"')))
     return metadata
 
-def get_rds_metadata():
+def get_rds_metadata(unified = False):
     global rds_metadata
-    rds_metadata['mfg'] = get_mfg()
-    rds_metadata['os'] = get_mfg()
-    rds_metadata['prod'] = get_mfg()
+    if unified:
+        rds_metadata['mfg'] = get_mfg(True)
+        rds_metadata['os'] = get_mfg(True)
+        rds_metadata['prod'] = get_mfg(True)
+    else:
+        rds_metadata['mfg'] = get_mfg()
+        rds_metadata['os'] = get_mfg()
+        rds_metadata['prod'] = get_mfg()
 
 def get_digest(path):
+    '''
+        Computes the sha1 message digest of a file 32KB at a time
+    '''
     digest = sha1()
     with open(path, 'rb') as f:
         while True:
@@ -136,26 +200,28 @@ def get_digest(path):
             digest.update(data_32)
     return digest.hexdigest().upper()
 
-def split_search(digests):
+def split_search(message_digests):
     '''
-        Compares SHA1 hashes to determine which directory to look in
+        Compares SHA1 hashes to determine which split directory to look in
     '''
     a, b, c, d = ([], [], [], [])
-    for digest in digests:
+    for digest in message_digests:
         int_digest = int(digest, 16)
         if A_min <= int_digest and int_digest <= A_max: a.append(digest)
         elif B_min <= int_digest and int_digest <= B_max: b.append(digest)
         elif C_min <= int_digest and int_digest <= C_max: c.append(digest)
         elif D_min <= int_digest and int_digest <= D_max: d.append(digest)
 
-    ta = Thread(target = unzip, args = (A_path, a))
-    tb = Thread(target = unzip, args = (B_path, b))
-    tc = Thread(target = unzip, args = (C_path, c))
-    td = Thread(target = unzip, args = (D_path, d))
+    ta = Thread(target = unzip_split, args = (A_path, a))
+    tb = Thread(target = unzip_split, args = (B_path, b))
+    tc = Thread(target = unzip_split, args = (C_path, c))
+    td = Thread(target = unzip_split, args = (D_path, d))
     for thread in [ta, tb, tc, td]:
         thread.start()
     for thread in [ta, tb, tc, td]:
         thread.join()
+
+def unified_search(message_digests): unzip_unified(U, message_digests)
 
 def segment_read(file_handle, segment_size = 4096 * 2): # NOT USED
     while True:
@@ -168,6 +234,10 @@ def segment_search(segment, key): # NOT USED
         if key == line[1:41]: return line
 
 def get_digests(path):
+    '''
+        For all files in the specified directory path, find all sha1 hashes
+    '''
+    global digests
     for root, dirs, files in os.walk(path):
         for f in files:
             if f.endswith('.exe') or f.endswith('.dll'):
@@ -190,17 +260,21 @@ def main():
     directory = args.directory
     dir_list = directory.split('/')
     lowest_dir = dir_list[len(dir_list) - 1]
-
-    split_metadata = load_map('metadata.json')
-    get_rds_metadata()
+    
     get_digests(directory)
     print 'Length of digests: ', len(digests)
-    
-    split_search(digests)
+
+    if len(digests) <= 50:
+        split_metadata = load_map('metadata.json')
+        get_rds_metadata()
+        split_search(digests)
+    else:
+        get_rds_metadata(True)
+        unified_search(sorted(digests.keys()))
     
     write_map('output/found_' + lowest_dir + '.json', status)
 
     print str(len(digests)) + ' out of ' + str(len(status)) + ' found in RDS'
-    print 'END:', datetime.now(), 'TIME ELAPSED:', time() - start
+    print 'END:', datetime.now(), '\tTIME ELAPSED:', time() - start
 
 main()
