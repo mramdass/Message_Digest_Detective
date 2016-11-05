@@ -9,6 +9,7 @@
 
 try:
     import os, sys, json, argparse, urllib, urllib2
+    from math import ceil
     from threading import Thread
     from time import time
     from datetime import datetime
@@ -65,6 +66,9 @@ rds_metadata = {}
 # Result of analysis goes here for all message digests
 status = {}
 
+# Malicious message digests
+malicious = {}
+
 # Metadata to search the correct NSLR text files in constant time; uses 'metadata.json'
 split_metadata = {}
 
@@ -90,7 +94,7 @@ def write_map(name, hashmap):
 def delay():
     global count, halt
     halt = True
-    sleep(61)
+    sleep(60)
     halt = False
     count = 0
 
@@ -104,12 +108,12 @@ def request_virustotal(digest):
     while halt: sleep(1)
     count += 1
     if count >= 4: delay()
-    url = 'https://www.virustotal.com/vtapi/v2/comments/put'
-    parameters = {'resource': digest, 'comment': '', 'apikey': API_KEY}
+    url = 'https://www.virustotal.com/vtapi/v2/file/report'
+    parameters = {'resource': digest, 'apikey': API_KEY}
     data = urllib.urlencode(parameters)
     req = urllib2.Request(url, data)
     response = urllib2.urlopen(req)
-    status[digest] = json.load(response) # loads --> response.read()
+    status[digest] = json.loads(response.read())
 
 def unzip_split(path, keys, read = False):
     '''
@@ -137,6 +141,7 @@ def unzip_split(path, keys, read = False):
                                 status[digest].append(line.rstrip())
                             else: status[digest].append(line.rstrip())
             if digest not in status:
+                status[digest] = 'Unknown' # Temporarily mark 'Unknown'
                 virustotal_thread = Thread(target = request_virustotal, args = [digest])
                 virustotal_threads.append(virustotal_thread)
                 virustotal_thread.start()
@@ -164,6 +169,7 @@ def unzip_unified(path, keys = None, read = False):
                         keys.pop(0)
                 if len(keys) == 0: break
                 while int(keys[0], 16) < int(line[1:41], 16):
+                    status[keys[0]] = 'Unknown' # Temporarily mark 'Unknown'
                     virustotal_thread = Thread(target = request_virustotal, args = [keys[0]])
                     virustotal_threads.append(virustotal_thread)
                     virustotal_thread.start()
@@ -281,7 +287,7 @@ def get_digests(path):
                 else: digests[get_digest(os.path.join(root, f))].append(os.path.join(root, f))
 
 def main():
-    global split_metadata, digests, rds_metadata, status
+    global split_metadata, digests, rds_metadata, status, malicious
     start = time()
     start_time = datetime.now()
     
@@ -303,8 +309,21 @@ def main():
         get_rds_metadata(True)
         unified_search(sorted(digests.keys()))
 
+    output_file = 'output/status_' + str(start_time).replace(' ', '-').replace(':', '-').replace('.', '-') + '.json'
+    write_map(output_file, status)
+    print 'END:', datetime.now(), '\tTIME ELAPSED:', str((time() - start)/60), 'minutes'
+    print '\tLocal scan completed\n\tNow waiting on VirusTotal response\n\t' + output_file + ' will be rewritten shortly'
+    print 'Max waiting time:', str(ceil(len(virustotal_threads) / float(4))), 'minutes'
     for thread in virustotal_threads: thread.join()
-    write_map('output/found_' + str(datetime.now()).replace(' ', '-').replace(':', '-').replace('.', '-') + '.json', status)
-    print 'END:', datetime.now(), '\tTIME ELAPSED:', time() - start
+    write_map(output_file, status)
+
+    # Copying malicious message digests
+    for digest in status:
+        if 'positives' in status[digest]:
+            if status[digest]['positives'] != 0:
+                malicious[digest] = status[digest]
+    write_map(output_file[:-5] + '_malicious.json', malicious)
+    print '\t' + str(len(malicious)) + ' message digest(s) detected'
+    print 'END:', datetime.now(), '\tTIME ELAPSED:', str((time() - start)/60), 'minutes'
 
 main()
