@@ -8,7 +8,7 @@
 '''
 
 try:
-    import os, sys, json, argparse
+    import os, sys, json, argparse, urllib, urllib2
     from threading import Thread
     from time import time
     from datetime import datetime
@@ -62,7 +62,7 @@ digests = {}
 # Map of data provided by NSLR; uses 'NSRLMfg.txt', 'NSRLOS.txt', and 'NSRLProd.txt'
 rds_metadata = {}
 
-# All the SHA-1 hashes that were found in the desired directory
+# Result of analysis goes here for all message digests
 status = {}
 
 # Metadata to search the correct NSLR text files in constant time; uses 'metadata.json'
@@ -71,14 +71,45 @@ split_metadata = {}
 # List to join VirusTotal threads
 virustotal_threads = []
 
-def load_map(name):
-    with open(name) as d:
-        return json.load(d)
+# Activate thread wait time in seconds
+count = 0
+halt = False
 
-def print_map(name): return json.dumps(name, sort_keys = True, indent = 4, separators=(',', ': '))
+# VirusTotal API key which allows for 4 requests per minute
+API_KEY = ''
+with open('key.txt', 'r') as k: API_KEY = k.read().rstrip()
+
+def load_map(name):
+    with open(name) as d: return json.load(d)
+
+def print_map(name): return json.dumps(name, sort_keys = True, indent = 4, separators = (',', ': '))
 
 def write_map(name, hashmap):
     with open(name, 'w') as w: w.write(print_map(hashmap))
+
+def delay():
+    global count, halt
+    halt = True
+    sleep(61)
+    halt = False
+    count = 0
+
+def request_virustotal(digest):
+    '''
+        VirusTotal API Usuage:
+        https://www.virustotal.com/en/documentation/public-api/
+        Selected code was used from the above link to request if a hash is malicious or not
+    '''
+    global status, count, halt
+    while halt: sleep(1)
+    count += 1
+    if count >= 4: delay()
+    url = 'https://www.virustotal.com/vtapi/v2/comments/put'
+    parameters = {'resource': digest, 'comment': '', 'apikey': API_KEY}
+    data = urllib.urlencode(parameters)
+    req = urllib2.Request(url, data)
+    response = urllib2.urlopen(req)
+    status[digest] = json.load(response) # loads --> response.read()
 
 def unzip_split(path, keys, read = False):
     '''
@@ -105,6 +136,10 @@ def unzip_split(path, keys, read = False):
                                 status[digest] = []
                                 status[digest].append(line.rstrip())
                             else: status[digest].append(line.rstrip())
+            if digest not in status:
+                virustotal_thread = Thread(target = request_virustotal, args = [digest])
+                virustotal_threads.append(virustotal_thread)
+                virustotal_thread.start()
 
 def unzip_unified(path, keys = None, read = False):
     '''
@@ -129,9 +164,9 @@ def unzip_unified(path, keys = None, read = False):
                         keys.pop(0)
                 if len(keys) == 0: break
                 while int(keys[0], 16) < int(line[1:41], 16):
-                    #CALL VIRUSTOTAL
-                    print 'virustotal'
-                    status[keys[0]] = 'UNKNOWN'
+                    virustotal_thread = Thread(target = request_virustotal, args = [keys[0]])
+                    virustotal_threads.append(virustotal_thread)
+                    virustotal_thread.start()
                     keys.pop(0)
                     if len(keys) == 0: break
             
@@ -216,10 +251,8 @@ def split_search(message_digests):
     tb = Thread(target = unzip_split, args = (B_path, b))
     tc = Thread(target = unzip_split, args = (C_path, c))
     td = Thread(target = unzip_split, args = (D_path, d))
-    for thread in [ta, tb, tc, td]:
-        thread.start()
-    for thread in [ta, tb, tc, td]:
-        thread.join()
+    for thread in [ta, tb, tc, td]: thread.start()
+    for thread in [ta, tb, tc, td]: thread.join()
 
 def unified_search(message_digests): unzip_unified(U, message_digests)
 
@@ -269,8 +302,9 @@ def main():
     else:
         get_rds_metadata(True)
         unified_search(sorted(digests.keys()))
-    
-    write_map('output/found_' + datetime.now() + '.json', status)
+
+    for thread in virustotal_threads: thread.join()
+    write_map('output/found_' + str(datetime.now()).replace(' ', '-').replace(':', '-').replace('.', '-') + '.json', status)
     print 'END:', datetime.now(), '\tTIME ELAPSED:', time() - start
 
 main()
