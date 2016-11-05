@@ -30,6 +30,6 @@ Clone/Download this respository. Note that the '.zip' files in this repository a
 
 ### To Run
 ```
-python mdd.py <path>
+python mdd.py -d <path>
 python split.py
 ```
