@@ -142,7 +142,7 @@ def get_mfg(unified = False):
         for line in unzip_unified(U_path + Mfg, read = True): metadata[line.split(',')[0].strip('"')] = line.split(',')[1].strip('"')
     else:
         for zipped in [A, B, C, D]:
-            for line in unzip(zipped, Mfg, read = True): metadata[line.split(',')[0].strip('"')] = line.split(',')[1].strip('"')
+            for line in unzip_split(zipped, Mfg, read = True): metadata[line.split(',')[0].strip('"')] = line.split(',')[1].strip('"')
     return metadata
 
 def get_os(unified = False):
@@ -155,7 +155,7 @@ def get_os(unified = False):
             metadata[line.split(',')[0].strip('"')]['mfg'] = line.split(',')[3].strip('"')
     else:
         for zipped in [A, B, C, D]:
-            for line in unzip(zipped, OS, read = True):
+            for line in unzip_split(zipped, OS, read = True):
                 metadata[line.split(',')[0].strip('"')] = { 'sysname': '', 'sysversion': '', 'mfg': '' }
                 metadata[line.split(',')[0].strip('"')]['sysname'] = line.split(',')[1].strip('"')
                 metadata[line.split(',')[0].strip('"')]['sysversion'] = line.split(',')[2].strip('"')
@@ -171,7 +171,7 @@ def get_prod(unified = False):
             metadata[line.split(',')[0].strip('"')].append((line.split(',')[1].strip('"'), line.split(',')[2].strip('"'), line.split(',')[3].strip('"'), line.split(',')[4].strip('"'), line.split(',')[5].strip('"'), line.split(',')[6].strip('"')))
     else:
         for zipped in [A, B, C, D]:
-            for line in unzip(zipped, Prod, read = True):
+            for line in unzip_split(zipped, Prod, read = True):
                 if line.split(',')[0].strip('"') not in metadata:
                     metadata[line.split(',')[0].strip('"')] = []
                 metadata[line.split(',')[0].strip('"')].append((line.split(',')[1].strip('"'), line.split(',')[2].strip('"'), line.split(',')[3].strip('"'), line.split(',')[4].strip('"'), line.split(',')[5].strip('"'), line.split(',')[6].strip('"')))
@@ -258,8 +258,6 @@ def main():
     print 'START:', start_time
 
     directory = args.directory
-    dir_list = directory.split('/')
-    lowest_dir = dir_list[len(dir_list) - 1]
     
     get_digests(directory)
     print 'Length of digests: ', len(digests)
@@ -272,9 +270,7 @@ def main():
         get_rds_metadata(True)
         unified_search(sorted(digests.keys()))
     
-    write_map('output/found_' + lowest_dir + '.json', status)
-
-    print str(len(digests)) + ' out of ' + str(len(status)) + ' found in RDS'
+    write_map('output/found_' + datetime.now() + '.json', status)
     print 'END:', datetime.now(), '\tTIME ELAPSED:', time() - start
 
 main()
