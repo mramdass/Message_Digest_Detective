@@ -81,7 +81,12 @@ halt = False
 
 # VirusTotal API key which allows for 4 requests per minute
 API_KEY = ''
-with open('key.txt', 'r') as k: API_KEY = k.read().rstrip()
+try:
+    with open('key.txt', 'r') as k: API_KEY = k.read().rstrip()
+except Exception as e:
+    print '\tCannot obtain VirusTotal API key'
+    print '\t', e
+    exit()
 
 def load_map(name):
     with open(name) as d: return json.load(d)
@@ -110,10 +115,13 @@ def request_virustotal(digest):
     if count >= 4: delay()
     url = 'https://www.virustotal.com/vtapi/v2/file/report'
     parameters = {'resource': digest, 'apikey': API_KEY}
-    data = urllib.urlencode(parameters)
-    req = urllib2.Request(url, data)
-    response = urllib2.urlopen(req)
-    status[digest] = json.loads(response.read())
+    try:
+        data = urllib.urlencode(parameters)
+        req = urllib2.Request(url, data)
+        response = urllib2.urlopen(req)
+        status[digest] = json.loads(response.read())
+    except Exception as e:
+        print '\t', e
 
 def unzip_split(path, keys, read = False):
     '''
@@ -222,12 +230,12 @@ def get_rds_metadata(unified = False):
     global rds_metadata
     if unified:
         rds_metadata['mfg'] = get_mfg(True)
-        rds_metadata['os'] = get_mfg(True)
-        rds_metadata['prod'] = get_mfg(True)
+        rds_metadata['os'] = get_os(True)
+        rds_metadata['prod'] = get_prod(True)
     else:
         rds_metadata['mfg'] = get_mfg()
-        rds_metadata['os'] = get_mfg()
-        rds_metadata['prod'] = get_mfg()
+        rds_metadata['os'] = get_os()
+        rds_metadata['prod'] = get_prod()
 
 def get_digest(path):
     '''
@@ -286,6 +294,24 @@ def get_digests(path):
                     digests[digest].append(os.path.join(root, f))
                 else: digests[get_digest(os.path.join(root, f))].append(os.path.join(root, f))
 
+def gather_metadata():
+    global status, rds_metadata
+    for digest in status:
+        if 'response_code' not in status[digest] and status[digest] != 'Unknown':
+            temp = {'os': {}, 'prod': {}, 'mfg': {}}
+            # The RDS has multiple lines with digest information for the same sha1 hash; look at all of them
+            entry = 1
+            for line in status[digest]:
+                entry += 1
+                temp['os'][entry] = rds_metadata['os'][line.split(',')[6].strip('"')]
+                temp['prod'][entry] = rds_metadata['prod'][line.split(',')[5]]
+                temp['mfg'][entry] = []
+                for product in rds_metadata['prod'][line.split(',')[5]]:
+                    temp['mfg'][entry].append(rds_metadata['mfg'][product[3]])
+                temp['mfg'][entry] = list(set(temp['mfg'][entry]))
+                temp['prod'][entry] = list(set(temp['prod'][entry]))
+            status[digest] = temp
+
 def main():
     global split_metadata, digests, rds_metadata, status, malicious
     start = time()
@@ -310,6 +336,7 @@ def main():
         unified_search(sorted(digests.keys()))
 
     output_file = 'output/status_' + str(start_time).replace(' ', '-').replace(':', '-').replace('.', '-') + '.json'
+    gather_metadata()
     write_map(output_file, status)
     print 'END:', datetime.now(), '\tTIME ELAPSED:', str((time() - start)/60), 'minutes'
     print '\tLocal scan completed\n\tNow waiting on VirusTotal response\n\t' + output_file + ' will be rewritten shortly'
