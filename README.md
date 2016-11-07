@@ -43,7 +43,7 @@ python split.py
 
 ### Output
 
-status_<datetime>.json  
+#### status_<time>.json  
 General output format will include both benign and malicious results.
 ```
 {
@@ -137,7 +137,7 @@ General output format will include both benign and malicious results.
 }
 ```
 
-status_<datetime>_malicious.json  
+#### status_<time>_malicious.json  
 Note that "positives" will be a none-zero value. Virus scanner will return true for "detected". The following malicious results will all come from VirusTotal.
 ```
 {
