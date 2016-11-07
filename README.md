@@ -143,7 +143,7 @@ Note that "positives" will be a none-zero value. Virus scanner will return true 
 {
     "<sha1>": {
         "md5": "<md5>",
-        "permalink": "https://www.virustotal.com/file/5ef4af3f7a2d0da7391beaf06029c20fdf48ebcf2c9e9130567576c2d19f30db/analysis/1477679332/",
+        "permalink": "https://www.virustotal.com/file/<value>/analysis/<value>/",
         "positives": 40,
         "resource": "#",
         "response_code": 1,
