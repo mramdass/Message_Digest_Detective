@@ -33,3 +33,10 @@ Clone/Download this respository. Note that the '.zip' files in this repository a
 python mdd.py -d <path>
 python split.py
 ```
+
+### Examples
+```
+python mdd.py -d C:/Windows/System32
+python mdd.py -d "C:/Program Files (x86)"
+python split.py
+```
