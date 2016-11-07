@@ -40,3 +40,140 @@ python mdd.py -d C:/Windows/System32
 python mdd.py -d "C:/Program Files (x86)"
 python split.py
 ```
+
+### Output
+
+status_<datetime>.json  
+General output format will include both benign and malicious results.
+```
+{
+    "<sha1>": "Unknown",
+    "0251964C4A50FE4D4847BD329CB12EA732D53587": {
+        "md5": "01c861d4fe98dc201c4799dccf331b58",
+        "permalink": "https://www.virustotal.com/file/5ef4af3f7a2d0da7391beaf06029c20fdf48ebcf2c9e9130567576c2d19f30db/analysis/1477679332/",
+        "positives": 0,
+        "resource": "0251964C4A50FE4D4847BD329CB12EA732D53587",
+        "response_code": 1,
+        "scan_date": "2016-10-28 18:28:52",
+        "scan_id": "5ef4af3f7a2d0da7391beaf06029c20fdf48ebcf2c9e9130567576c2d19f30db-1477679332",
+        "scans": {
+            "ALYac": {
+                "detected": false,
+                "result": null,
+                "update": "20161028",
+                "version": "1.0.1.9"
+            },
+            "AVG": {
+                "detected": false,
+                "result": null,
+                "update": "20161028",
+                "version": "16.0.0.4664"
+            },
+            ...
+            "nProtect": {
+                "detected": false,
+                "result": null,
+                "update": "20161028",
+                "version": "2016-10-28.01"
+            }
+        },
+        "sha1": "0251964c4a50fe4d4847bd329cb12ea732d53587",
+        "sha256": "5ef4af3f7a2d0da7391beaf06029c20fdf48ebcf2c9e9130567576c2d19f30db",
+        "total": 57,
+        "verbose_msg": "Scan finished, information embedded"
+    },
+    "3DE026EAD09443B90E951AFDAF150C6D4A3E288C": {
+        "mfg": {
+            "2": [
+                "Microsoft"
+            ],
+            ...
+            "8": [
+                "Dell"
+            ],
+            ...
+            "14": [
+                "Microsoft"
+            ]
+        },
+        "os": {
+            "2": {
+                "mfg": "1006",
+                "sysname": "TBD",
+                "sysversion": "none"
+            },
+            ...
+            "14": {
+                "mfg": "1006",
+                "sysname": "TBD",
+                "sysversion": "none"
+            }
+        },
+        "prod": {
+            "2": [
+                [
+                    "Windows 7 Home Premium",
+                    "c.2009",
+                    "360",
+                    "609",
+                    "English",
+                    "Operating System"
+                ]
+            ],
+            ...
+            "14": [
+                [
+                    "MSDN Disc 5085",
+                    "November 2012",
+                    "189",
+                    "609",
+                    "English",
+                    "MSDN Library"
+                ]
+            ]
+        }
+    },
+    ...
+}
+```
+
+status_<datetime>_malicious.json  
+Note that "positives" will be a none-zero value. Virus scanner will return true for "detected". The following malicious results will all come from VirusTotal.
+```
+{
+    "<sha1>": {
+        "md5": "<md5>",
+        "permalink": "https://www.virustotal.com/file/5ef4af3f7a2d0da7391beaf06029c20fdf48ebcf2c9e9130567576c2d19f30db/analysis/1477679332/",
+        "positives": 40,
+        "resource": "#",
+        "response_code": 1,
+        "scan_date": "<datetime>",
+        "scan_id": "<id>",
+        "scans": {
+            "ALYac": {
+                "detected": true,
+                "result": <value>,
+                "update": "<value>",
+                "version": "<value>"
+            },
+            "AVG": {
+                "detected": true,
+                "result": <value>,
+                "update": "<value>",
+                "version": "<value>"
+            },
+            ...
+            "nProtect": {
+                "detected": true,
+                "result": <value>,
+                "update": "<value>",
+                "version": "<value>"
+            }
+        },
+        "sha1": "<sha1>",
+        "sha256": "<sha256>",
+        "total": 57,
+        "verbose_msg": "<message>"
+    }
+}
+```
