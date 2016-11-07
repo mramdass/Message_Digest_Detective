@@ -94,7 +94,7 @@ def load_map(name):
 def print_map(name): return json.dumps(name, sort_keys = True, indent = 4, separators = (',', ': '))
 
 def write_map(name, hashmap):
-    with open(name, 'w') as w: w.write(print_map(hashmap))
+    with open(name, 'w') as w: w.write(print_map(hashmap).encode('utf-8'))
 
 def delay():
     global count, halt
