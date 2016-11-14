@@ -290,7 +290,7 @@ def get_digests(path):
     global digests
     for root, dirs, files in os.walk(path):
         for f in files:
-            if f.lower().endswith(extension):
+            if f.lower().endswith(extensions):
                 digest = get_digest(os.path.join(root, f))
                 if digest not in digests:
                     digests[digest] = []
