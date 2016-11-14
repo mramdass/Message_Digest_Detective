@@ -88,6 +88,8 @@ except Exception as e:
     print '\t', e
     exit()
 
+extensions = ('.dll', '.exe', '.pif', '.application', '.gadget', '.msi', '.com', '.scr', '.hta', '.cpl', '.msc', '.jar')
+
 def load_map(name):
     with open(name) as d: return json.load(d)
 
@@ -287,7 +289,7 @@ def get_digests(path):
     global digests
     for root, dirs, files in os.walk(path):
         for f in files:
-            if f.endswith('.exe') or f.endswith('.dll'):
+            if f.endswith(extension):
                 digest = get_digest(os.path.join(root, f))
                 if digest not in digests:
                     digests[digest] = []
