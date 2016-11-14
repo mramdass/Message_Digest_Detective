@@ -88,6 +88,7 @@ except Exception as e:
     print '\t', e
     exit()
 
+# Extensions to look at - Note these are execuatables or may contain exectuable code that Windows treat as executable
 extensions = ('.dll', '.exe', '.pif', '.application', '.gadget', '.msi', '.com', '.scr', '.hta', '.cpl', '.msc', '.jar')
 
 def load_map(name):
