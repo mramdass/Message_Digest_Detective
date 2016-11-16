@@ -7,9 +7,8 @@
 ## Getting Started
 
 Use these instructions to get started with Message Digest Detective  
-split.py is a formatter for the RDS files found in the zipped file. split.py will create A.zip, B.zip, C.zip, and D.zip from RDS_253_A.zip, RDS_253_B.zip, RDS_253_C.zip, and RDS_253_D.zip. this script is meant to be run once when you first download the Combo DVD.  
-To actually search for malicious or unknown files, you will run mdd.py by specifing the directory to analyze. Windows System32, Program Files and Program Files (x86) are the directories this script is meant to run on.  
-The RDS_Unified directory is redundant and not necessary.
+split.py is a formatter for the RDS files found in the zipped file. split.py will create text files, and in a later update will zip into A.zip, B.zip, C.zip, and D.zip from RDS_253_A.zip, RDS_253_B.zip, RDS_253_C.zip, and RDS_253_D.zip. This script is meant to be run once when you first download the Combo DVD. As of now: in each folder (A, B, C, and D), you will need a program like 7-zip to compress into a zip file all the files.   
+To actually search for malicious or unknown files, you will run mdd.py by specifing the directory to analyze. Windows System32, Program Files and Program Files (x86) are the directories this script is meant to run on.
 
 ### Prerequisities
 
