@@ -7,7 +7,7 @@
 ## Getting Started
 
 Use these instructions to get started with Message Digest Detective  
-split.py is a formatter for the RDS files found in the zipped file. split.py will create text files, and in a later update will zip into A.zip, B.zip, C.zip, and D.zip from RDS_253_A.zip, RDS_253_B.zip, RDS_253_C.zip, and RDS_253_D.zip. This script is meant to be run once when you first download the Combo DVD. As of now: in each folder (A, B, C, and D), you will need a program like 7-zip to compress into a zip file all the files.   
+split.py is a formatter for the RDS files found in the zipped file. split.py will create text files, and will zip into A.zip, B.zip, C.zip, and D.zip from RDS_253_A.zip, RDS_253_B.zip, RDS_253_C.zip, and RDS_253_D.zip. This script is meant to be run once when you first download the Combo DVD.  
 To actually search for malicious or unknown files, you will run mdd.py by specifing the directory to analyze. Windows System32, Program Files and Program Files (x86) are the directories this script is meant to run on.
 
 ### Prerequisities
@@ -23,21 +23,21 @@ NSRL RDS - Combo DVD
 http://www.nsrl.nist.gov/Downloads.htm
 ```
 
-### Installing
+### Setting Up
 
-Clone/Download this respository. Note that the '.zip' files in this repository are placeholders as it is very large. From the Combo DVD, place the appropriate named '.zip' file in the appropriate directory. Then run split.py to generate the remaining '.zip' files as mentioned in 'Getting Started'.
+Clone/Download this respository. Note that the '.zip' files in this repository are placeholders as it is very large. From the Combo DVD, place the appropriate named '.zip' file in the appropriate directory. Then run split.py to generate the remaining '.zip' files as mentioned in 'Getting Started'. NOTE: split.py should only be run once.
 
 ### To Run
 ```
-python mdd.py -d <path>
 python split.py
+python mdd.py -d <path>
 ```
 
 ### Examples
 ```
+python split.py
 python mdd.py -d C:/Windows/System32
 python mdd.py -d "C:/Program Files (x86)"
-python split.py
 ```
 
 ### Output
