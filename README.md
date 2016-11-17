@@ -6,7 +6,8 @@
 
 ## Getting Started
 
-Use these instructions to get started with Message Digest Detective  
+Use the following instructions to get started with Message Digest Detective  
+The intuition behind Message Digest Detective is to be able to scan an entire directory of sub-directories and files which may include thousands of files in less than an hour. Previous attempts to create an effective tool would check a file of hashes one by one which was very time consuming. Furthermore, Message Digest Detective was intended to scan the Windows System32 directory; the intuition here is discover any malicious executables that are running or have been placed there to run. Other applications use this folder to extensively.  
 split.py is a formatter for the RDS files found in the zipped file. split.py will create text files, and will zip into A.zip, B.zip, C.zip, and D.zip from RDS_253_A.zip, RDS_253_B.zip, RDS_253_C.zip, and RDS_253_D.zip. This script is meant to be run once when you first download the Combo DVD.  
 To actually search for malicious or unknown files, you will run mdd.py by specifing the directory to analyze. Windows System32, Program Files and Program Files (x86) are the directories this script is meant to run on.
 
