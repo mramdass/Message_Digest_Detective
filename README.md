@@ -177,3 +177,7 @@ Note that "positives" will be a none-zero value. Virus scanner will return true 
     }
 }
 ```
+### References
+
+"National Software Reference Library." National Software Reference Library. N.p., n.d. Web.  
+26 Oct. 2016. <http://www.nsrl.nist.gov/>.
