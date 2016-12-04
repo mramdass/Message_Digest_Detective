@@ -26,7 +26,7 @@ http://www.nsrl.nist.gov/Downloads.htm
 
 ### Setting Up
 
-Clone/Download this respository. Note that the '.zip' files in this repository are placeholders as it is very large. From the Combo DVD, place the appropriate named '.zip' file in the appropriate directory. Then run split.py to generate the remaining '.zip' files as mentioned in 'Getting Started'. NOTE: split.py should only be run once.
+Clone/Download this respository. Note that the '.zip' files in this repository are placeholders as it is very large. From the Combo DVD, place the appropriate named '.zip' file in the appropriate directory. Then run split.py to generate the remaining '.zip' files as mentioned in 'Getting Started'. NOTE: split.py should only be run once. This entire directory can be added to Autopsy's plugin directory; this way mdd_handler.py will be used to interface with Autopsy.
 
 ### To Run
 ```
