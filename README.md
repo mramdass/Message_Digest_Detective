@@ -7,9 +7,34 @@
 ## Sypnosis/Getting Started
 
 Use the following instructions to get started with Message Digest Detective  
-The intuition behind Message Digest Detective is to be able to scan an entire directory of sub-directories and files which may include thousands of files in less than an hour - a Windows 7 System32 scan of 3,357 files returned results in 20.5 minutes. Previous attempts to create an effective tool would check a file of hashes one by one which was very time consuming. Furthermore, Message Digest Detective was initially intended to scan the Windows System32 directory; the intuition here is to discover any malicious executables that are running or have been placed there to run. Windows applications use this folder extensively. Since the hash files are so large, the split hash files can accually be placed in separate disks and run. It will be much faster to do hash look ups this way. Message Digest Detective will get the hashes for all of the executables in the folder you pass in via command line. It will then search the NSRL Hash list. This hash list is a list of all benign programs. If a hash is exists in this file, it is safe to assume it is not malicious. The majority (98%+) of the hashes obtain by Message Digest Detective will be found in the hash list. This leaves only about 2% of files to be concerned about. These remaining files will then be processed through the VirusTotal API to determine whether they are malicious or not. It is better to filter out all/most of the benign files before analyzing the questioned/unknown file since the VirusTotal API only takes four requests per minute for a free account. While an unknown file is discovered through Message Digest Detective, it is queued to run as soon as time permits. In general, it is best to filter benign files locally before using an API as it will be faster to reduce the bulk of the processing.  
+The intuition behind Message Digest Detective is to be able to scan an entire directory of sub-directories and files which may include thousands of files in less than an hour - a Windows 7 System32 scan of 3,357 files returned results in 20.5 minutes. Previous attempts to create an effective tool would check a file of hashes one by one which was very time consuming. Furthermore, Message Digest Detective was initially intended to scan the Windows System32 directory; the intuition here is to discover any malicious executables that are running or have been placed there to run. Windows applications use this folder extensively. Since the hash files are so large, the split hash files can accually be placed in separate disks and run. It will be much faster to do hash look ups this way. Message Digest Detective will get the hashes for all of the executables in the folder you pass in via command line. It will then search the NSRL Hash list. This hash list is a list of all benign programs. If a hash exists in this file, it is safe to assume it is not malicious. The majority (98%+) of the hashes obtain by Message Digest Detective will be found in the hash list. This leaves only about 2% of files to be concerned about. These remaining files will then be processed through the VirusTotal API to determine whether they are malicious or not. It is better to filter out all/most of the benign files before analyzing the questioned/unknown file since the VirusTotal API only takes four requests per minute for a free account. While an unknown file is discovered through Message Digest Detective, it is queued to run as soon as time permits. In general, it is best to filter benign files locally before using an API as it will be faster to reduce the bulk of the processing.  
 split.py is a formatter for the RDS files found in the zipped file. split.py will create text files, and will zip into A.zip, B.zip, C.zip, and D.zip from RDS_253_A.zip, RDS_253_B.zip, RDS_253_C.zip, and RDS_253_D.zip. This script is meant to be run once when you first download the Combo DVD.  
 To actually search for malicious or unknown files, you will run mdd.py by specifing the directory to analyze. Windows System32, Program Files and Program Files (x86) are the directories this script is meant to run on.
+
+### Methodology
+```
+Input directory
+    |
+     --> Discover all files
+            |
+             --> Compute Hashes
+                    |
+                     --> if list of hashes exceeds 50 (this number changes to sys.maxint if files on on different drives)
+                            |
+                             --> Unified Search: open NSRL Unified RDS zip file and search for hashes in order (linearly)
+                                    |
+                                     --> Spawn a VirusTotal thread for each hash that does not exist where it should be
+                         else
+                            |
+                             --> Split Search: Compute if hash should be in sub directory A, B, C, or D
+                                    |
+                                     --> Compute which bucket file the hash should be in and search there
+                                            |
+                                             --> Spawn a VirusTotal hread for each hash that does not exist where it should be
+
+    |
+     --> Output Data
+```
 
 ### Prerequisities
 
