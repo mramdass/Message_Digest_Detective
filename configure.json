@@ -1,0 +1,11 @@
+{
+	"Split": {
+		"A": "RDS_Split/A/",
+		"B": "RDS_Split/B/",
+		"C": "RDS_Split/C/",
+		"D": "RDS_Split/D/"
+	},
+	"Unified": "RDS_Unified/",
+	"Key": "None"
+	
+}
