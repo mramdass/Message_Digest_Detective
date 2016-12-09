@@ -300,7 +300,7 @@ def split_search(message_digests):
     for thread in [ta, tb, tc, td]: thread.start()
     for thread in [ta, tb, tc, td]: thread.join()
 
-def unified_search(message_digests): unzip_unified(U, message_digests)
+def unified_search(message_digests): unzip_unified(U_path + U.split('/')[1], message_digests)
 
 def segment_read(file_handle, segment_size = 4096 * 2): # NOT USED
     while True:
