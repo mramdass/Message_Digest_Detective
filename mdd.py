@@ -81,21 +81,49 @@ halt = False
 
 # VirusTotal API key which allows for 4 requests per minute
 API_KEY = ''
+
+'''
 try:
     with open('key.txt', 'r') as k: API_KEY = k.read().rstrip()
 except Exception as e:
     print '\tCannot obtain VirusTotal API key'
     print '\t', e
     exit()
+'''
 
 # Extensions to look at - Note these are execuatables or may contain exectuable code that Windows treat as executable
 extensions = ('.dll', '.exe', '.pif', '.application', '.gadget', '.msi', '.com', '.scr', '.hta', '.cpl', '.msc', '.jar')
+
+# Running Threshold for whether split or unified function should be called
+threshold = 50
 
 def load_map(name):
     with open(name) as d: return json.load(d)
 
 def print_map(name): return json.dumps(name, sort_keys = True, indent = 4, separators = (',', ': '))
 
+def configure():
+    '''
+        The function split_search is threaded. If the locations
+        of the file paths are in different drives or external
+        devices, read accessing would boost search performance.
+        The threshold is set so that any number of hashes can
+        be checked.
+    '''
+    global A_path, B_path, C_path, D_path, U_path, threshold, API_KEY
+    data = load_map('configure.json')
+    API_KEY = data['Key']
+    if API_KEY == 'None':
+        print '\tMust have a valid VirusTotal API Key'
+        exit()
+    A_path = data['Split']['A']
+    B_path = data['Split']['B']
+    C_path = data['Split']['C']
+    D_path = data['Split']['D']
+    U_path = data['Unified']
+    if A_path != 'RDS_Split/A/' or B_path != 'RDS_Split/B/' or C_path != 'RDS_Split/C/' or D_path != 'RDS_Split/D/' or U_path != 'RDS_Unified/':
+        threshold = sys.maxint
+    
 def write_map(name, hashmap):
     with open(name, 'w') as w: w.write(print_map(hashmap).encode('utf-8'))
 
@@ -110,7 +138,8 @@ def request_virustotal(digest):
     '''
         VirusTotal API Usuage:
         https://www.virustotal.com/en/documentation/public-api/
-        Selected code was used from the above link to request if a hash is malicious or not
+        Selected code was used from the above link to request
+        if a hash is malicious or not
     '''
     global status, count, halt
     while halt: sleep(1)
@@ -315,10 +344,35 @@ def gather_metadata():
                 temp['prod'][entry] = list(set(temp['prod'][entry]))
             status[digest] = temp
 
+def handler(autopsy_digests):
+    global split_metadata, rds_metadata, status, malicious
+
+    if len(autopsy_digests) <= 50:
+        split_metadata = load_map('metadata.json')
+        get_rds_metadata()
+        split_search(autopsy_digests)
+    else:
+        get_rds_metadata(True)
+        unified_search(sorted(autopsy_digests.keys()))
+
+    output_file = 'output/status_' + str(start_time).replace(' ', '-').replace(':', '-').replace('.', '-') + '.json'
+    gather_metadata()
+    write_map(output_file, status)
+    for thread in virustotal_threads: thread.join()
+    write_map(output_file, status)
+
+    # Copying malicious message digests
+    for digest in status:
+        if 'positives' in status[digest]:
+            if status[digest]['positives'] != 0:
+                malicious[digest] = status[digest]
+    write_map(output_file[:-5] + '_malicious.json', malicious)
+
 def main():
-    global split_metadata, digests, rds_metadata, status, malicious
+    global split_metadata, digests, rds_metadata, status, malicious, threshold
     start = time()
     start_time = datetime.now()
+    configure()
     
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--directory", help = "Desired directory to analyze", required = True)
@@ -330,7 +384,7 @@ def main():
     get_digests(directory)
     print 'Length of digests: ', len(digests)
 
-    if len(digests) <= 50:
+    if len(digests) <= threshold:
         split_metadata = load_map('metadata.json')
         get_rds_metadata()
         split_search(digests)
