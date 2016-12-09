@@ -1,13 +1,13 @@
 # Message Digest Detective
-
+## Munieshwar (Kevin) Ramdass
 ## CS-GY 6963
 ## Fall 2016
 ##
 
-## Getting Started
+## Sypnosis/Getting Started
 
 Use the following instructions to get started with Message Digest Detective  
-The intuition behind Message Digest Detective is to be able to scan an entire directory of sub-directories and files which may include thousands of files in less than an hour. Previous attempts to create an effective tool would check a file of hashes one by one which was very time consuming. Furthermore, Message Digest Detective was intended to scan the Windows System32 directory; the intuition here is discover any malicious executables that are running or have been placed there to run. Other applications use this folder to extensively.  
+The intuition behind Message Digest Detective is to be able to scan an entire directory of sub-directories and files which may include thousands of files in less than an hour - a Windows 7 System32 scan of 3,357 files returned results in 20.5 minutes. Previous attempts to create an effective tool would check a file of hashes one by one which was very time consuming. Furthermore, Message Digest Detective was initially intended to scan the Windows System32 directory; the intuition here is to discover any malicious executables that are running or have been placed there to run. Windows applications use this folder extensively. Since the hash files are so large, the split hash files can accually be placed in separate disks and run. It will be much faster to do hash look ups this way. Message Digest Detective will get the hashes for all of the executables in the folder you pass in via command line. It will then search the NSRL Hash list. This hash list is a list of all benign programs. If a hash is exists in this file, it is safe to assume it is not malicious. The majority (98%+) of the hashes obtain by Message Digest Detective will be found in the hash list. This leaves only about 2% of files to be concerned about. These remaining files will then be processed through the VirusTotal API to determine whether they are malicious or not. It is better to filter out all/most of the benign files before analyzing the questioned/unknown file since the VirusTotal API only takes four requests per minute for a free account. While an unknown file is discovered through Message Digest Detective, it is queued to run as soon as time permits. In general, it is best to filter benign files locally before using an API as it will be faster to reduce the bulk of the processing.  
 split.py is a formatter for the RDS files found in the zipped file. split.py will create text files, and will zip into A.zip, B.zip, C.zip, and D.zip from RDS_253_A.zip, RDS_253_B.zip, RDS_253_C.zip, and RDS_253_D.zip. This script is meant to be run once when you first download the Combo DVD.  
 To actually search for malicious or unknown files, you will run mdd.py by specifing the directory to analyze. Windows System32, Program Files and Program Files (x86) are the directories this script is meant to run on.
 
@@ -26,7 +26,9 @@ http://www.nsrl.nist.gov/Downloads.htm
 
 ### Setting Up
 
-Clone/Download this respository. Note that the '.zip' files in this repository are placeholders as it is very large. From the Combo DVD, place the appropriate named '.zip' file in the appropriate directory. Then run split.py to generate the remaining '.zip' files as mentioned in 'Getting Started'. NOTE: split.py should only be run once. This entire directory can be added to Autopsy's plugin directory; this way mdd_handler.py will be used to interface with Autopsy.
+Clone/Download this respository. Note that the '.zip' files in this repository are placeholders as it is very large. From the Combo DVD, place the appropriate named '.zip' file in the appropriate directory. Then run split.py to generate the remaining '.zip' files as mentioned in 'Getting Started'. NOTE: split.py should only be run once.  
+There is a configure.json which allows you to specific the zipped file paths if you choose to locate them on separate drives. The split_search algorithm is threaded and so read accesses will be efficiently run if the files are opened from separate disks/devices.  
+You must have a VirusTotal API Key. <https://www.virustotal.com/>
 
 ### To Run
 ```
@@ -181,3 +183,4 @@ Note that "positives" will be a none-zero value. Virus scanner will return true 
 
 "National Software Reference Library." National Software Reference Library. N.p., n.d. Web.  
 26 Oct. 2016. <http://www.nsrl.nist.gov/>.
+"VirusTotal - Free Online Virus, Malware and URL Scanner." VirusTotal - Free Online Virus, Malware and URL Scanner. N.p., n.d. Web. 08 Dec. 2016. <https://www.virustotal.com/>.
