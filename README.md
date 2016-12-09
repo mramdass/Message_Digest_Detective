@@ -182,5 +182,5 @@ Note that "positives" will be a none-zero value. Virus scanner will return true 
 ### References
 
 "National Software Reference Library." National Software Reference Library. N.p., n.d. Web.  
-26 Oct. 2016. <http://www.nsrl.nist.gov/>.
+26 Oct. 2016. <http://www.nsrl.nist.gov/>.  
 "VirusTotal - Free Online Virus, Malware and URL Scanner." VirusTotal - Free Online Virus, Malware and URL Scanner. N.p., n.d. Web. 08 Dec. 2016. <https://www.virustotal.com/>.
