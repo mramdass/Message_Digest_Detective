@@ -30,7 +30,7 @@ Input directory
                                     |
                                      --> Compute which bucket file the hash should be in and search there
                                             |
-                                             --> Spawn a VirusTotal hread for each hash that does not exist where it should be
+                                             --> Spawn a VirusTotal thread for each hash that does not exist where it should be
 
     |
      --> Output Data
