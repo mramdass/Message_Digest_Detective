@@ -19,7 +19,7 @@ Input directory
             |
              --> Compute Hashes
                     |
-                     --> if list of hashes exceeds 50 (this number changes to sys.maxint if files on on different drives)
+                     --> if list of hashes exceeds 50 (this number changes to sys.maxint if files are on different drives)
                             |
                              --> Unified Search: open NSRL Unified RDS zip file and search for hashes in order (linearly)
                                     |
@@ -31,9 +31,11 @@ Input directory
                                      --> Compute which bucket file the hash should be in and search there
                                             |
                                              --> Spawn a VirusTotal thread for each hash that does not exist where it should be
-
+________________________________________________________________________________________________________________________________
     |
-     --> Output Data
+     --> Scan for malicious files and specifically output those
+    |
+     --> Output All Data
 ```
 
 ### Prerequisities
