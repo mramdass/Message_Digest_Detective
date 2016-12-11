@@ -344,30 +344,6 @@ def gather_metadata():
                 temp['prod'][entry] = list(set(temp['prod'][entry]))
             status[digest] = temp
 
-def handler(autopsy_digests):
-    global split_metadata, rds_metadata, status, malicious
-
-    if len(autopsy_digests) <= 50:
-        split_metadata = load_map('metadata.json')
-        get_rds_metadata()
-        split_search(autopsy_digests)
-    else:
-        get_rds_metadata(True)
-        unified_search(sorted(autopsy_digests.keys()))
-
-    output_file = 'output/status_' + str(start_time).replace(' ', '-').replace(':', '-').replace('.', '-') + '.json'
-    gather_metadata()
-    write_map(output_file, status)
-    for thread in virustotal_threads: thread.join()
-    write_map(output_file, status)
-
-    # Copying malicious message digests
-    for digest in status:
-        if 'positives' in status[digest]:
-            if status[digest]['positives'] != 0:
-                malicious[digest] = status[digest]
-    write_map(output_file[:-5] + '_malicious.json', malicious)
-
 def main():
     global split_metadata, digests, rds_metadata, status, malicious, threshold
     start = time()
